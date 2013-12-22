@@ -7,8 +7,8 @@ from PyQt4.QtGui import *
 
 from threading import Thread, Event
 
-
-commands = ["Jerk Off!", "Buy Some Shit", "Jerk Off!"]
+pcommands = ["Read", "Write", "Draw","Rap","Meditate"]
+dcommands = ["Jerk Off!", "Buy Some Shit", "Jerk Off!", "Get some money", "Score some coke!"]
 
 class Commands(QThread): 
 
@@ -47,8 +47,7 @@ class Form(QDialog):
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
     def setTimeText(self, time):
-        p1 = int(time) / 60 
-        p2 = int(time) % 60 
+        p1,p2 = divmod(int(time), 60)
         if p2 < 10: p2 = "0" + str(p2)
         self.timetext.setText("<font size=200>"+str(p1)+":"+str(p2)+"</font>")
 
@@ -65,6 +64,7 @@ class Form(QDialog):
         self.timing = Commands(showTime)
         self.timing.start()
         self.setCommandText(getCommand())
+        self.setTimeText(showTime)
         self.timetext.connect(self.timing, SIGNAL("update(QString)"), self.setTimeText)
         self.connect(self.timing, SIGNAL('timefinished'), self.sleepyTime)
         self.show()
@@ -77,12 +77,21 @@ def toMinutes(num):
     return num*60
 
 if __name__ == '__main__':
+        
     argparser = argparse.ArgumentParser(description='pass some integers')
-    argparser.add_argument('ints', metavar='N', type=int, nargs=2, help="input two numbers, first is the delay time, second is show time")
+    argparser.add_argument('-dt','--delaytime', metavar='N', type=int, default=25, help="please input two integerst, first is delaytime second is showtime")
+    argparser.add_argument('-st','--showtime', metavar='N', type=int, default=5, help="please input two integerst, first is delaytime second is showtime")
+    argparser.add_argument('-dys', '--dystopian', action='store_true')
     args = argparser.parse_args()
+    if(args.dystopian):
+        print 'using dystopian commands'
+        commands = dcommands
+    else: 
+        commands = pcommands
 
-    delayTime = toMinutes(args.ints[0])
-    showTime = toMinutes(args.ints[1])
+
+    delayTime = toMinutes(args.delaytime)
+    showTime = toMinutes(args.showtime)
     app = QApplication(sys.argv)
     form = Form()   
     form.sleepyTime()
