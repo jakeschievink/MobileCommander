@@ -1,6 +1,6 @@
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-import sys, time, sched, random
+import sys, time, sched, random, argparse
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -46,8 +46,11 @@ class Form(QDialog):
         self.setWindowFlags(Qt.SplashScreen)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
-    def setTimeText(self, message):
-        self.timetext.setText("<font size=200>"+str(message)+"</font>")
+    def setTimeText(self, time):
+        p1 = int(time) / 60 
+        p2 = int(time) % 60 
+        if p2 < 10: p2 = "0" + str(p2)
+        self.timetext.setText("<font size=200>"+str(p1)+":"+str(p2)+"</font>")
 
     def setCommandText(self, message):
         self.commandtext.setText("<font size=300>"+str(message)+"</font>")
@@ -70,14 +73,17 @@ class Form(QDialog):
 
 def getCommand():
     return random.choice(commands)
+def toMinutes(num):
+    return num*60
 
 if __name__ == '__main__':
+    argparser = argparse.ArgumentParser(description='pass some integers')
+    argparser.add_argument('ints', metavar='N', type=int, nargs=2, help="input two numbers, first is the delay time, second is show time")
+    args = argparser.parse_args()
+
+    delayTime = toMinutes(args.ints[0])
+    showTime = toMinutes(args.ints[1])
     app = QApplication(sys.argv)
-    try: 
-        delayTime = int(sys.argv[1])
-        showTime = int(sys.argv[2])
-    except ValueError:
-        print "Value Error"
     form = Form()   
     form.sleepyTime()
     app.exec_()
